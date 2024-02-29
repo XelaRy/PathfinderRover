@@ -1,0 +1,59 @@
+<html>
+
+<head>
+    <title> WebSockets Client</title>
+    <script src='http://code.jquery.com/jquery-1.9.1.min.js'></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            height: 100vh;
+        }
+        img {
+            /*width: 100%;
+            height: 100%;*/
+        }
+    </style>
+</head>
+
+<body>
+    <img id='live' src=''>
+</body>
+
+</html>
+<script>
+    jQuery(function ($) {
+        if (!('WebSocket' in window)) {
+            alert('Your browser does not support web sockets');
+        } else {
+            setup();
+        }
+        function setup() {
+            var host = 'ws://server_ip:81';
+            var socket = new WebSocket(host);
+            socket.binaryType = 'arraybuffer';
+            if (socket) {
+                socket.onopen = function () {
+                }
+                socket.onmessage = function (msg) {
+                    var bytes = new Uint8Array(msg.data);
+                    var binary = '';
+                    var len = bytes.byteLength;
+                    for (var i = 0; i < len; i++) {
+                        binary += String.fromCharCode(bytes[i])
+                    }
+                    var img = document.getElementById('live');
+                    img.src = 'data:image/jpg;base64,' + window.btoa(binary);
+                }
+                socket.onclose = function () {
+                    showServerResponse('The connection has been closed.');
+                }
+            }
+        }
+    });
+</script>
