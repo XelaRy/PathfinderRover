@@ -63,6 +63,10 @@ void setup() {
   const String ssid = config.getSSID();
   const String password = config.getPassword();
 
+  Serial.println("Connecting to WiFi");
+  Serial.println(ssid);
+  Serial.println(password);
+
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
