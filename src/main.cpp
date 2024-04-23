@@ -43,6 +43,16 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t* payload, size_t length)
             connected = true;
             break;
         case WStype_TEXT:
+            if (strcmp((char*)payload, "motor1on") == 0) {
+                digitalWrite(motor1, HIGH);
+            } else if (strcmp((char*)payload, "motor1off") == 0) {
+                digitalWrite(motor1, LOW);
+            } else if (strcmp((char*)payload, "motor2on") == 0) {
+                digitalWrite(motor2, HIGH);
+            } else if (strcmp((char*)payload, "motor2off") == 0) {
+                digitalWrite(motor2, LOW);
+            }
+            break;
         case WStype_BIN:
         case WStype_ERROR:      
         case WStype_FRAGMENT_TEXT_START:
