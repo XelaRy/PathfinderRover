@@ -6,6 +6,10 @@
 #include "config.hpp"
 #include "camera.hpp"
 
+// Motor pins
+constexpr uint8_t motor1 = 12;
+constexpr uint8_t motor2 = 13;
+
 WebSocketsServer webSocket = WebSocketsServer(81);
 WiFiServer server(80);
 uint8_t cam_num;
@@ -14,20 +18,21 @@ bool connected = false;
 String index_html;
 
 void liveCam(uint8_t num){
-  //capture a frame
-  camera_fb_t * fb = esp_camera_fb_get();
+  // Capture a frame
+  camera_fb_t* fb = esp_camera_fb_get();
   if (!fb) {
       Serial.println("Frame buffer could not be acquired");
       return;
   }
-  //replace this with your own function
+
+  // Send the frame buffer to the client
   webSocket.sendBIN(num, fb->buf, fb->len);
 
-  //return the frame buffer back to be reused
+  // Return the frame buffer back to be reused
   esp_camera_fb_return(fb);
 }
 
-void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length) {
+void webSocketEvent(uint8_t num, WStype_t type, uint8_t* payload, size_t length) {
 
     switch(type) {
         case WStype_DISCONNECTED:
@@ -48,29 +53,10 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
     }
 }
 
-void setup() {
-  Serial.begin(115200);
-
-  pinMode(4, OUTPUT);
-  digitalWrite(4, LOW);
-
+void loadWebPage() {
   if (!SPIFFS.begin(true)) {
     Serial.println("An error occurred while mounting SPIFFS");
     return;
-  }
-
-  Config config;
-  const String ssid = config.getSSID();
-  const String password = config.getPassword();
-
-  Serial.println("Connecting to WiFi");
-  Serial.println(ssid);
-  Serial.println(password);
-
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    // Serial.print(".");
   }
 
   File file = SPIFFS.open("/index.html", "r");
@@ -82,18 +68,52 @@ void setup() {
     index_html += char(file.read());
   }
   file.close();
+}
 
+void setup() {
+  // Setup serial monitor
+  Serial.begin(115200);
+
+  // Motor pins
+  pinMode(motor1, OUTPUT);
+  pinMode(motor2, OUTPUT);
+
+  // Flash LED
+  pinMode(4, OUTPUT);
+  digitalWrite(4, LOW);
+
+  Config config;
+  const String ssid = config.getSSID();
+  const String password = config.getPassword();
+
+  // Serial.println("Connecting to WiFi");
+  // Serial.println("SSID: " + ssid);
+  // Serial.println("Password: " + password);
+
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    // Serial.print(".");
+  }
+
+  loadWebPage();
+
+  // Print the IP address on the serial monitor
   Serial.println("");
   String IP = WiFi.localIP().toString();
   Serial.println("IP address: " + IP);
-  digitalWrite(4, HIGH);
+
+  // Turn on flash LED
+  // digitalWrite(4, HIGH);
+
   index_html.replace("server_ip", IP);
   server.begin();
   webSocket.begin();
   webSocket.onEvent(webSocketEvent);
 
-  const framesize_t frameSize = config.getFrameSize();
+  // const framesize_t frameSize = config.getFrameSize();
   // const framesize_t frameSize = FRAMESIZE_240X240;
+  const framesize_t frameSize = FRAMESIZE_96X96;
   Serial.println("Frame size: " + String(frameSize));
   configCamera(frameSize);
 }
