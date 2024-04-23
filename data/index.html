@@ -58,25 +58,21 @@
                     showServerResponse('The connection has been closed.');
                 }
             }
+            $('#motor1On').click(function() {
+                socket.send('motor1on');
+            });
+            
+            $('#motor1Off').click(function() {
+                socket.send('motor1off');
+            });
+            
+            $('#motor2On').click(function() {
+                socket.send('motor2on');
+            });
+            
+            $('#motor2Off').click(function() {
+                socket.send('motor2off');
+            });
         }
-    });
-    jQuery(function ($) {
-        var socket = new WebSocket('ws://' + window.location.hostname + ':81');
-        
-        $('#motor1On').click(function() {
-            socket.send('motor1on');
-        });
-        
-        $('#motor1Off').click(function() {
-            socket.send('motor1off');
-        });
-        
-        $('#motor2On').click(function() {
-            socket.send('motor2on');
-        });
-        
-        $('#motor2Off').click(function() {
-            socket.send('motor2off');
-        });
     });
 </script>
