@@ -63,12 +63,14 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t* payload, size_t length)
     }
 }
 
-void loadWebPage() {
+void loadSPIFFS() {
   if (!SPIFFS.begin(true)) {
     Serial.println("An error occurred while mounting SPIFFS");
     return;
   }
+}
 
+void loadWebPage() {
   File file = SPIFFS.open("/index.html", "r");
   if (!file) {
     Serial.println("Failed to open file for reading");
@@ -91,6 +93,8 @@ void setup() {
   // Flash LED
   pinMode(4, OUTPUT);
   digitalWrite(4, LOW);
+
+  loadSPIFFS();
 
   Config config;
   const String ssid = config.getSSID();
